@@ -47,7 +47,9 @@ function rows(view: "daily_signal" | "friction", limit: number) {
     JOIN items i   ON i.id = r.item_id
     JOIN sources s ON s.id = i.source_id
     WHERE r.view = ${view}
-      AND r.ranked_for_day = CURRENT_DATE
+      AND r.ranked_for_day = (
+        SELECT max(ranked_for_day) FROM rankings WHERE view = ${view}
+      )
     ORDER BY r.rank_position
     LIMIT ${limit}
   `;

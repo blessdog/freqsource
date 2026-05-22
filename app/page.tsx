@@ -23,18 +23,18 @@ export default async function Page() {
 
   return (
     <Shell>
-      <div className="flex items-center justify-between px-4 py-2 font-mono text-[11px] text-faint">
-        <span>Most important emerging stories · last 72h</span>
-        <span className="tnum">{items.length} ranked</span>
+      <div className="flex items-center justify-between px-5 py-2.5 font-mono text-[11px] text-faint">
+        <span>What actually matters · last 72h · curated, not aggregated</span>
+        <span className="tnum">{items.length} signal</span>
       </div>
       {items.length === 0 ? (
-        <p className="px-4 py-10 font-mono text-sm text-muted">
+        <p className="px-5 py-10 font-mono text-sm text-muted">
           Nothing meets the bar in this window.
         </p>
       ) : (
         <div>
-          {items.map((it) => (
-            <StoryRow key={`${it.rank_position}-${it.title}`} item={it} />
+          {items.map((it, idx) => (
+            <StoryRow key={`${idx}-${it.title}`} item={it} />
           ))}
         </div>
       )}

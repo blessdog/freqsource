@@ -1,80 +1,58 @@
 # freqsource
 
-Stage 1: Reddit radar spine for **freqsource.com**.
+SIGNAL/NOISE — a news feed for the AI industry that surfaces what
+practitioners are actually hitting, not what press releases say. Live
+at [freqsource.com](https://freqsource.com).
 
-> Reddit is a topic radar, not a source of truth — fresh interest spikes here
-> first. Stage 1 polls a small set of weighted, AI-focused subreddits, stores
-> posts in SQLite, ranks them by traction × source weight, and renders a page.
-> No LLM yet. Clustering, primary-source synthesis, media capture, and
-> newsletter export come in later stages.
+![The Daily Signal feed](docs/readme/feed.jpg)
 
-## Stack
+Each card is one claim, with the friction underneath it in orange —
+what users report breaking, what commenters couldn't reproduce, where
+the benchmark is undefined. The interesting part of AI news is almost
+always in the pushback, and the pushback is what most feeds drop.
 
-- **Next.js 15 + TypeScript + Tailwind** — single web app, App Router.
-- **SQLite (better-sqlite3)** — local file at `data/freqsource.db`.
-- **Reddit native JSON** — no auth, polite User-Agent. Upgrade to OAuth only
-  if/when we hit rate limits.
+## The journey
 
-## Quickstart
+**Stage 1 — the radar (2026-05-21, morning).** Reddit as a topic
+radar: poll a small set of weighted AI subreddits, store posts, rank
+by traction × source weight, render a page. No LLM anywhere. This
+worked as a radar and failed as a product — a ranked list of hot
+links is still just aggregation, and aggregation is a solved,
+worthless problem.
 
-```bash
-# 1. Install
-npm install
+**Stage 1.5 — the pivot (2026-05-21, same day).** Redesigned around
+an LLM *editorial* layer. The rule that came out of this and now
+applies to every news-shaped tool I build: **the LLM is a curator,
+not a summarizer.** Never feed it the firehose — cheap deterministic
+filters (traction, source weight, recency) cut hundreds of candidates
+down to a shortlist, and the model spends its judgment only on those:
+is the claim load-bearing, what's the friction, is it worth writing
+about. Summarizing everything produces slop at scale; judging a
+shortlist produces an editor.
 
-# 2. Configure your User-Agent (Reddit is grumpy about anonymous polling)
-cp .env.example .env
-# edit .env, set REDDIT_USER_AGENT to your real reddit handle
+**V1 economics: $0.** No paid X/Twitter API, no paid data vendors —
+public forums only. The constraint was a feature: it forced the
+source-weighting and funnel design instead of buying reach.
 
-# 3. Initialize DB + seed the 6 weighted subreddits
-npm run init-db
+**Deployed** — Postgres (Neon) + Next.js, served from Hostinger. The
+ingest currently runs when I run it; making it breathe on a schedule
+is the next step, and the feed's timestamps are honest about that.
 
-# 4. Pull one polling pass from Reddit (proves the spine end to end)
-npm run poll
-
-# 5. Eyeball what landed in the DB
-npm run show
-
-# 6. Run the web app
-npm run dev
-# open http://localhost:3000
-```
-
-## Seeded sources (Stage 1)
-
-Carried over as **data only** from the prior signal-noise project — the
-weights and trust-notes encode editorial judgment we want to keep.
-
-| Subreddit            | Weight | Notes                                       |
-| -------------------- | ------ | ------------------------------------------- |
-| r/LocalLLaMA         | 1.3    | Real model testing; top practitioner signal |
-| r/MachineLearning    | 1.3    | Research community vs. press spin           |
-| r/cscareerquestions  | 1.2    | Labor reality                               |
-| r/antiAI             | 0.9    | Friction/critic — discount doom bias        |
-| r/opposeAI           | 0.9    | Friction/critic — discount doom bias        |
-| r/aiwars             | 0.9    | Pro/anti debate — discount flamewar         |
-
-## Layout
+## How it works
 
 ```
-src/
-  lib/
-    db.ts          better-sqlite3 client + schema init
-    sources.ts     the 6 seeded subs + their weights/notes
-    reddit.ts      Reddit JSON fetcher (polite UA, 429 handling)
-    ingest.ts      poll loop: fetch, upsert, track first/last_seen
-    rank.ts        traction × source_weight × freshness scorer
-  app/
-    layout.tsx     Tailwind base
-    page.tsx       ranked feed (server component, auto-refresh)
-    globals.css
-  scripts/
-    init-db.ts     create schema, seed sources
-    poll.ts        one polling pass (cron-friendly)
-    show.ts        eyeball the top-ranked rows from the CLI
-data/              gitignored — SQLite file lives here
+weighted sources ─▶ poll ─▶ store ─▶ deterministic ranking
+                                          │  (traction × weight)
+                                     shortlist
+                                          │
+                              LLM editorial pass
+                     claim · friction · verdict · badges
+                                          │
+                                    Daily Signal
 ```
 
-## What V1 does NOT do (yet)
+## Status
 
-No LLM. No clustering. No outbound-link fetch. No media capture. No
-newsletter. No deployment. Those are Stages 2–5. The spine runs first.
+Live, working, dormant between manual ingest runs. Open: scheduled
+ingest, the Clusters and Claims views (nav exists, depth doesn't),
+and widening sources beyond forums without breaking the $0 rule.

@@ -1,27 +1,31 @@
 {
-  "name": "web",
+  "name": "freqsource",
   "version": "0.1.0",
   "private": true,
+  "description": "Stage 1: Reddit radar spine for freqsource.com",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "init-db": "tsx src/scripts/init-db.ts",
+    "poll": "tsx src/scripts/poll.ts",
+    "show": "tsx src/scripts/show.ts"
   },
   "dependencies": {
-    "next": "16.2.6",
-    "postgres": "^3.4.9",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "better-sqlite3": "^11.7.0",
+    "next": "^15.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }
